@@ -1,0 +1,68 @@
+,Interface,Included_Packets,Excluded_Packets,Node1,Filter1,Text1,Action1,Node2,Filter2,Text2,Action2
+0,UNUSED,"srcIp: 10.12.11.2/32
+dstIP: 1.0.0.0/8
+srcIp: 10.12.11.2/32
+dstIP: 10.12.11.1/32
+srcIp: 2.0.0.0/8
+dstIP: 1.0.0.0/8
+srcIp: 2.0.0.0/8
+dstIP: 10.12.11.1/32
+","srcIp: 10.12.11.2/32
+dstIP: 10.12.11.1/32
+
+srcIp: 2.0.0.0/8
+dstIP: 1.0.0.0/8
+
+",border1-current,INSIDE_TO_AS1,allow-inside-to-as1,ACCEPT,border1-reference,INSIDE_TO_AS1,deny   ip any any,REJECT
+1,UNUSED,"srcIp: 10.23.21.2/32
+dstIP: 10.23.21.3/32
+srcIp: 10.23.21.2/32
+dstIP: 3.0.0.0/8
+srcIp: 2.0.0.0/8
+dstIP: 10.23.21.3/32
+srcIp: 2.0.0.0/8
+dstIP: 3.0.0.0/8
+","srcIp: 10.23.21.2/32
+dstIP: 10.23.21.3/32
+
+srcIp: 2.0.0.0/8
+dstIP: 3.0.0.0/8
+
+",border2-current,INSIDE_TO_AS3,allow-to-as3,ACCEPT,border2-reference,INSIDE_TO_AS3,deny   ip any any,REJECT
+2,UNUSED,"srcIp: 0.0.0.0/0
+dstIP: 2.128.0.0/23
+TCP
+","srcIp: 0.0.0.0/0
+dstIP: 2.128.0.0/23
+srcPort: [0,65535]
+dstPort: [22,22]
+TCP
+
+srcIp: 0.0.0.0/0
+dstIP: 2.128.0.0/23
+srcPort: [0,65535]
+dstPort: [80,80]
+TCP
+
+",leaf1-current,RESTRICT_HOST_TRAFFIC_OUT,allow-http-ssh,ACCEPT,leaf1-reference,RESTRICT_HOST_TRAFFIC_OUT,deny   ip any any,REJECT
+3,UNUSED,"srcIp: 0.0.0.0/0
+dstIP: 2.128.0.0/23
+srcPort: [0,65535]
+dstPort: [80,80]
+TCP
+","srcIp: 0.0.0.0/0
+dstIP: 2.128.0.0/23
+srcPort: [0,65535]
+dstPort: [80,80]
+TCP
+
+",leaf1-current,RESTRICT_HOST_TRAFFIC_OUT,default-deny,REJECT,leaf1-reference,RESTRICT_HOST_TRAFFIC_OUT,permit tcp any 2.128.0.0 0.0.1.255 eq www,ACCEPT
+4,UNUSED,"srcIp: 0.0.0.0/0
+dstIP: 0.0.0.0/0
+","srcIp: 0.0.0.0/0
+dstIP: 2.128.0.2/32
+
+srcIp: 0.0.0.0/0
+dstIP: 2.128.1.2/32
+
+",leaf1-current,RESTRICT_NETWORK_TRAFFIC_IN,deny-clients,REJECT,leaf1-reference,RESTRICT_NETWORK_TRAFFIC_IN,permit ip any any,ACCEPT

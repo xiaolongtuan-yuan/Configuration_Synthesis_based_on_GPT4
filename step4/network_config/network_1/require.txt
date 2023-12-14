@@ -1,0 +1,23 @@
+已知网络中包含以下设备组件
+core: as1core1,as2core1,as2core2,as2dist1,as2dist2,as2dept1,as3core1
+border: as1border1,as1border2,as2border1,as2border2,as3border1,as3border2
+host: host1,host2
+
+且该网络被划分为AS1,AS2,AS3个自治系统3，其中：
+AS1包含设备:as1border1,as1core1,as1border2
+AS2包含设备:as2border1,as2border2,as2core1,as2core2,as2dist1,as2dist2,as2dept1,host1,host2
+AS3包含设备:as3border1,as3border2,as3core1
+
+网络拓扑图的边由下列设备对组成
+[as1core1,as1border1],[as1core1,as1border2],[as1border1,as2border1],[as1border2,as3border2],[as3border2,as3core1],[as3core1,as3border1],[as3border1,as2border2],[as2border2,as2core1],[as2border2,as2core2],[as2border1,as2core1],[as2border1,as2core2],[as2core1,as2dist1],[as2core1,as2dist2],[as2core2,as2dist1],[as2core1,as2dist2],[as2dist1,as2dept1],[as2dist2,as2dept1],[as2dept1,host1],[as2dept1,host2]
+根据设备连接关系，基于Cisco IOS为所有设备生成完整的设备配置文件
+以下是所有设备的基本配置文件，其中包括了设备名及接口IP地址的分配，在此基础上扩充配置文件使其能够正常运行起来，
+要求网络的路由转发平面满足下列路由策略：
+使用BGP协议保证流量能够从AS1到达host1
+使用BGP协议保证流量从AS1到达AS2的路径中需要避开['AS3']
+使用BGP协议保证流量从AS3转发到host1，流量在网络中会依次经过AS2core2
+在AS1内部使用OSPF协议保证流量能够在AS1与host1间转发
+在AS1内部使用OSPF协议保证流量从AS1到达AS2的路径中需要避开['AS3']
+在AS3内部使用OSPF协议保证流量从AS3转发到host1，流量在网络中会依次经过as2core2
+
+{}

@@ -1,0 +1,6 @@
+,Protocol,Prefix,Node1,Source1,Node2,Source2
+0,STATIC,2.128.1.1/32,core1,route 2.128.1.1/32 reject,core1,None
+1,OSPF,2.1.2.2/32,core2,None,core2,interface Loopback0
+2,OSPF,2.34.101.0/24,spine1,interface ge-0/0/2.0,spine1,None
+3,OSPF,2.34.201.0/24,spine2,interface xe-0/0/2.0,spine2,None
+4,STATIC,2.128.0.0/16,spine2,route 2.128.0.0/16 reject,spine2,None

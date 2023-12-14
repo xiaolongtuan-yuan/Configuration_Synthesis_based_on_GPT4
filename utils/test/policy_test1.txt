@@ -1,0 +1,7 @@
+已知网络中包含以下设备组件
+2个主机：host-db,host-www
+7个交换机：leaf1,spine1,spine2,core1,core2,border1,border2
+满足下列高级策略：
+1. 所有交换机都能到达host主机
+2. 从border1到host主机的流量必须经过core1
+3. 从border2到host主机到流量不可以经过core2

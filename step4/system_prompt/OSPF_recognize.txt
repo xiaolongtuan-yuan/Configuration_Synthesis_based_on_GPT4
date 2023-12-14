@@ -1,0 +1,99 @@
+已知有如下三种OSPF低级路由策略需求的描述谓词：
+1. check_waypoint(start,end,waypoint)：流量从start节点转发到end节点，流量在网络中需要依次经过waypoint节点列表，当waypoint节点列表为空时，表示start节点能直接到达end节点，该谓词只能为真
+2. check_reachable(start,end)：为真时，流量能够从start节点到达end节点；为假时，流量不能从start节点到达end节点
+3. check_avoidance(start,end,avoidance): 流量从start节点转发到end节点，流量需要避开avoidance节点，只能为真
+一种静态路由的描述谓词如下：
+1. static_route(start,end, waypoint): 从start出发以end节点作为终点的流量包，按照静态路由依次经过waypoint列表中的节点
+
+用户会提供一段高级路由策略的描述，从中抽象出涉及每个AS内部的OSPF协议和静态路由的低级策略需求（不考虑BGP协议涉及的需求）。
+例如：对于需求“从AS1core1设备到AS2需要经过AS1core2，AS1core3，AS1border1设备。” 在该需求中，可以知道AS1能够到达AS2网络这样的BGP需求，而在AS1内部，
+AS1border1作为边界路由器与AS2相连，为了使流量能沿着AS1core1，AS1core2，AS1core3，AS1border1的路径，所以在AS1内部产生了新的OSPF需求：从AS1core1到AS1border1需要依次经过AS1core2，AS1core3
+若存在一组OSPF的需求无法同时满足，则只抽象部分OSPF需求，使用静态路由满足其他需求
+例如：对于需求“AS2和AS3不能互通”，是对自治系统间的跨域路由约束，不涉及AS内部设备的转发平面，所以这里不对该需求进行抽象操作
+例如：对于需求“从as1core1到as2core1应依次经过as1core2、as1border1、as2border1”可以抽象出的OSPF约束有：在AS1内部从as1core1到as1border1应经过as1core2，在AS2内部as2border1可以直接到达as2core1
+例如：对于需求“从as1core1到AS2应依次经过as1core2、as1border1”和“从as1core1到AS3应依次经过as1core3、as1border1” 两条需求如果都抽象为OSPF，则会产生“在AS1内部保证流量从as1core1转发到as1border1，流量中会依次经过as1core2”和“在AS1内部保证流量从as1core1转发到as1border1，流量会依次经过as1core4”，显然这是矛盾的，因为OSPF无法保证具有相同起点和目的地的流量有不同的路径，所以应该将第二条约束抽象为静态路由，即“在AS1内部使用静态路由保证从保证从as1core1出发以AS2作为终点的流量包，按照静态路由依次经过as1core4和as1border1节点”
+
+按照要求使用json的格式回复，并使用列表记录多个低级约束：
+{
+  "result": [
+    {
+      "policy": 低级策略名,
+      "AS_name": 该ospf需求所在的自治网络名
+      "parameter": 策略填入的参数,
+      "bool": true或者false，表示该策略是否为真,
+      "type": "OSPF"或"static"，用于指明该策略属于哪个协议
+    },
+    {}
+  ]
+}
+
+示例：
+user:
+已知网络中的设备如下
+AS1包含设备：as1core1,as1core2,as1core3,as1border1
+AS2包含设备：as2border1,as2core1
+AS3包含设备：as3border1,as3core1
+需求：
+1. AS2和AS3不能互通
+2. 从as1core1到AS2应依次经过as1core2、as1border1
+3. 从as1core1到AS3应依次经过as1core3、as1border1
+assistent:
+{
+  "result": [
+    {
+      "policy": "check_waypoint",
+      "AS_name": "AS1",
+      "parameter": {
+        "start": "as1core1",
+        "waypoint":["as1core2"]
+        "end": "as1border1"
+      },
+      "bool": true,
+      "type": "OSPF"
+    },
+    {
+      "policy": "static_route",
+      "AS_name": "AS1",
+      "parameter": {
+        "start": "as1core1",
+        "end": "AS3",
+        "waypoint":["as1core3", "as1border1"]
+      },
+      "bool": true,
+      "type": "static"
+    }
+  ]
+}
+
+user:
+已知网络AS1的边界路由器为as1border1
+需求：
+2. 从as1core1到AS2应依次经过as1core2、as1core3、as1border1
+3. 从as1core1到AS4应依次经过as1core4、as1border1
+assistent:
+{
+  "result": [
+    {
+      "policy": "check_waypoint",
+      "AS_name": "AS1",
+      "parameter": {
+        "start": "as1core1",
+        "waypoint":["as1core2","as1core3"]
+        "end": "as1border1"
+      },
+      "bool": true,
+      "type": "OSPF"
+    },
+    {
+      "policy": "static_route",
+      "AS_name": "AS1",
+      "parameter": {
+        "start": "as1core1",
+        "end": "AS4",
+        "waypoint":["as1core4", "as1border1"]
+      },
+      "bool": true,
+      "type": "static"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+为了确保从host1到达AS2的流量必须经过AS2core1交换机，我们需要在AS2网络的边缘路由器上配置相应的策略。我们可以通过以下步骤实现这个目标：
+
+1. 在AS2border1和AS2border2路由器上配置策略路由，用于识别从host1出发的流量，并确保将这部分流量引导至AS2core1。
+2. 同时，我们需要在AS2core2上配置策略来确保从host2出发到达AS3的流量不能通过AS2core1。
+
+#### 修改AS2border1.cfg和AS2border2.cfg
+
+在 `as2border1.cfg` 和 `as2border2.cfg` 中，添加一个前缀列表（prefix-list）来标识host1的流量，然后创建路由映射（route-map），强制这些流量通过AS2core1。在 `as2border1.cfg` 或 `as2border2.cfg` 文件中，我们可以插入以下配置：
+
+```
+!
+ip prefix-list HOST1_TRAFFIC seq 5 permit 2.128.0.101/32
+!
+route-map PREFER_AS2CORE1 permit 10
+ match ip address prefix-list HOST1_TRAFFIC
+ set ip next-hop 2.12.11.2 2.12.12.2
+!
+router bgp 2
+ address-family ipv4
+  neighbor 10.12.11.2 route-map PREFER_AS2CORE1 in
+  neighbor 10.12.21.2 route-map PREFER_AS2CORE1 in
+ exit-address-family
+!
+```
+
+请注意，这将假设 `2.12.11.2` 和 `2.12.12.2` 是AS2core1上的接口地址，必须根据实际情况进行替换。
+
+#### 修改AS2core2的配置
+
+由于没有 `AS2core2.cfg` 的当前配置示例，无法提供确切的配置命令。但我们可以考虑类似以下的配置改动：
+
+在 `as2core2.cfg` 中，添加一个访问控制列表（ACL）或前缀列表（prefix-list）来标识从host2出发的流量，并添加一个策略路由来禁止它们通过AS2core1。
+
+例如：
+
+```
+!
+ip prefix-list HOST2_TRAFFIC seq 5 permit 2.128.1.101/32
+!
+route-map AVOID_AS2CORE1 permit 10
+ match ip address prefix-list HOST2_TRAFFIC
+ set ip next-hop <AS3接口的下一跳IP地址>
+!
+router bgp 2
+ address-family ipv4
+  neighbor <相应邻居IP> route-map AVOID_AS2CORE1 in
+ exit-address-family
+!
+```
+
+#### 注意：
+
+- 确保 `<AS3接口的下一跳IP地址>` 是指向AS3的正确下一跳IP。
+- 这样的配置可能会与现有的BGP策略产生冲突，因此在实际应用这些改动之前，需要考虑完整的网络设计和现有的路由策略。
+- 实际上，由于这些策略调整可能涉及到复杂的BGP策略和路由选择，实施这些修改应该在详细的网络分析和计划的基础上进行，以避免意外中断流量或引入新的问题。
+- 如果网络基础设施支持，可以考虑使用流量工程技术，如MPLS-TE来满足上述要求。
+
+这个解决方案假设我们有权限和能力在BGP路由器上执行修改，并且策略的变更不会影响网络的其他部分。在真实世界的网络操作中，任何此类修改都将需要详尽的测试和潜在的改动，以确保网络的稳定性和服务的可靠性。

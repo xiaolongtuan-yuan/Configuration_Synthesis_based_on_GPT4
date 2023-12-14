@@ -1,0 +1,77 @@
+已知有如下三种低级网络策略需求：
+1. check_waypoint(start,end,waypoint)：流量从start节点转发到end节点，流量在网络中会依次经过waypoint列表中的节点，当waypoint列表为空时，表示start能直接到达end，该谓词只能为真
+2. check_reachable(start,end)：为真时，流量能够从start节点到达end节点；为假时，流量不能从start节点到达end节点
+3. check_avoidance(start,end,avoidance): 流量从start节点转发到end节点，流量需要避开avoidance节点，只能为真
+
+用户会提供一段高级路由策略的描述，从中抽象出涉及BGP协议的低级策略需求，注意BGP协议只约束自治系统间跨域的转发、可达和隔离策略，不涉及具体的设备名，对于具体设备的约束策略由OSPF和静态路由负责。
+例如：对于需求“从as1core1到AS2应依次经过as1core2、as1border1”，其中可以抽象出的BGP跨域需求只有“AS1能够直接到达AS2，不经过其他节点”，其中流量经过的具体路径应在AS1内部由OSPF协议进行约束，本次不做抽象操作
+例如：对于需求“AS2、AS3和AS4间不能互通”可以抽象出的BGP约束有：AS2不能到达AS3，AS2不能到达AS4，AS3不能到达AS4，AS3不能到达AS2，AS4不能到达AS2，AS4不能到达AS3
+例如：对于需求“从as1core1到as2core1应依次经过as1core2、as1border1、as2border1”可以抽象出的BGP约束有：AS1能够到达AS2，其余全是OSPF约束
+按照要求使用json的格式回复，并使用列表记录多个低级约束：
+{
+  "result": [
+    {
+      "policy": 低级策略名,
+      "parameter": 策略填入的参数，这里只能使用自治系统的AS名,
+      "bool": true或者false，表示该策略是否为真,
+      "type": "BGP"，用于指明该策略属于BGP协议
+    },
+    {}
+  ]
+}
+
+例如：
+user:
+已知3个自治网络的设备列表如下：
+AS1:AS1core1、AS1core2、AS1host1、AS1border1、AS1border2
+AS2:AS2core1、AS2border1
+AS3:AS3core1、AS3border1
+1. AS1core1和AS1core2设备均能到达主机AS1host1。
+2. 网络AS2、AS3之间不能互通
+assistent:
+{
+  "result": [
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "start": "AS2",
+        "end": "AS3"
+      },
+      "bool": false,
+      "type": "BGP"
+    },
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "start": "AS3",
+        "end": "AS2"
+      },
+      "bool": false,
+      "type": "BGP"
+    },
+
+  ]
+}
+
+user:
+已知3个自治网络的设备列表如下：
+AS1:AS1core1、AS1core2、AS1host1、AS1border1、AS1border2
+AS2:AS2core1、AS2border1
+AS3:AS3core1、AS3border1
+1. AS1core1和AS1core2设备均能到达主机AS1host1。
+2. 网络AS2通过AS1连接到AS3
+assistent:
+{
+  "result": [
+    {
+      "policy": "check_waypoint",
+      "parameter": {
+        "start": "AS2",
+        "end": "AS3",
+        "waypoint":["AS1"]
+      },
+      "bool": true,
+      "type": "BGP"
+    }
+  ]
+}

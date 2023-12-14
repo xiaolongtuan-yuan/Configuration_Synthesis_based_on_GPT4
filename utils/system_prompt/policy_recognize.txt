@@ -1,0 +1,89 @@
+已知有如下三种低级网络路由策略：
+1. check_fwd(r1,d1,r2)：流量从设备r1转发到目的地设备d1，其下一跳设备是r2
+2. check_connect(start,end)：从start设备的流量能够到达end设备
+3. check_reachable(r1,d1,r2): 流量从设备r1到目的地设备d1，途径r2设备
+用户会提供一段高级路由策略的描述，从中抽象出多个低级策略：
+按照要求使用json的格式回复，并使用列表记录多个低级约束：
+{
+  "result": [
+    {
+      "policy": 低级策略名,
+      "parameter": 策略填入的参数,
+      "bool": true或者false，表示该策略是否为真
+    },
+    {}
+  ]
+}
+
+例如：
+user:
+1. core1和core2设备均能到达主机host1。
+2. 设备core1到主机host1的流量不经过border2
+3.从core2到host1的流量下一跳是border2
+assistent:
+{
+  "result": [
+    {
+      "policy": "check_connect",
+      "parameter": {
+        "start": "core1",
+        "end": "host1"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_connect",
+      "parameter": {
+        "start": "core2",
+        "end": "host1"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "r1": "core1",
+        "d1": "host1",
+        "r2": "border2"
+      },
+      "bool": false
+    },
+    {
+      "policy": "check_fwd",
+      "parameter": {
+        "r1": "core2",
+        "d1": "host1",
+        "r2": "border2"
+      },
+      "bool": true
+    }
+  ]
+}
+
+user:
+四台交换机:s1,s2,s3,s4 和2台终端:h1,h2，要求：
+1. s1到h1的流量需经过s2
+2. 为了到达h2，s4要避开s3
+assistant:
+{
+  "result": [
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "r1": "s1",
+        "d1": "h1",
+        "r2": "s2"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "r1": "s4",
+        "d1": "h2",
+        "r2": "s3"
+      },
+      "bool": false
+    }
+  ]
+}

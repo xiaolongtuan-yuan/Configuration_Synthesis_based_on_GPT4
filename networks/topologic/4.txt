@@ -1,0 +1,610 @@
+已知网络中包含以下设备组件
+2个主机：host-db,host-www
+7个交换机：leaf1,spine1,spine2,core1,core2,border1,border2
+网络拓扑图的边由下列设备对组成
+[host-www,leaf1],[host-db,leaf1],[leaf1,spine2],[leaf1,spine1],[spine1,core1],[spine1,core2],[spine2,core1],[spine2,core2],[core1,border1],[core1,border2],
+[core2,border1],[core2,border2]
+网络的拓扑图如下，根据设备连接关系，基于Cisco IOS为所有设备生成完整的设备配置文件
+只考虑OSPF协议，自动为所有设备的接口分配合适的网段和IP地址
+同时满足下列路由策略：
+1. 所有交换机都能到达host主机
+2. 从border1到host主机的流量必须经过core1
+3. 从border2到host主机到流量不可以经过core2
+
+以下是所有设备的基本配置文件，其中包括了对接口IP地址的分配，在此基础上扩充配置文件使其能够正常运行起来：
+## configs/leaf1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname leaf1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.1.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.34.101.4 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.34.201.4 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.128.0.2 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet3/0
+ ip address 2.128.1.2 255.255.255.252
+ negotiation auto
+!
+end
+
+```
+
+## configs/core2.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname core2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging host 1.1.1.1
+logging host 2.2.2.2
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.2.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.12.22.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.12.12.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.23.22.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet3/0
+ ip address 2.23.21.2 255.255.255.0
+ negotiation auto
+!
+end
+
+```
+
+## configs/core1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname core1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging host 1.1.1.1
+logging host 2.1.2.2
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.2.1 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.12.11.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.12.21.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.23.11.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet3/0
+ ip address 2.23.12.2 255.255.255.0
+ negotiation auto
+!
+end
+
+```
+
+## configs/spine2.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname spine2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.3.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.23.22.3 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.23.12.3 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.34.201.3 255.255.255.0
+ negotiation auto
+!
+!
+end
+
+```
+
+## configs/border2.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname border2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+ntp server 18.18.18.18
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.1.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 10.23.21.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.12.22.1 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.12.21.1 255.255.255.0
+ negotiation auto
+!
+end
+
+```
+
+## configs/spine1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname spine1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.3.1 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.23.11.3 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.23.21.3 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.34.101.3 255.255.255.0
+ negotiation auto
+!
+end
+
+```
+
+## configs/border1.cfg
+
+```
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname border1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+ntp server 18.18.18.18
+ntp server 23.23.23.23
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+aaa new-model
+aaa authentication login privilege-mode
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.1.1 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 10.12.11.2 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.12.11.1 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.12.12.1 255.255.255.0
+ negotiation auto
+!
+end
+
+```
+
+## hosts/host-www.json
+
+```
+{
+	"hostname" : "host-www",
+	"hostInterfaces" : {
+		"eth0" : {
+			"name": "eth0",
+      "prefix" : "2.128.1.1/30",
+      "gateway" : "2.128.1.2"
+		}
+	}
+}
+
+```
+
+## hosts/host-db.json
+
+```
+{
+	"hostname" : "host-db",
+	"hostInterfaces" : {
+		"eth0" : {
+			"name": "eth0",
+      "prefix" : "2.128.0.1/30",
+      "gateway": "2.128.0.2"
+		}
+	}
+}
+
+```
+

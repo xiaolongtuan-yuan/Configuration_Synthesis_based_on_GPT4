@@ -1,0 +1,14 @@
+已知网络中包含以下设备组件
+2个主机：host1,host2
+13个交换机：as1core1,as1border1,as1border2,as3core1,as3border1,as3border2,as2core1,as2core2,as2border1,as2border2,as2dist1,as2dist2
+且该网络被划分为3个自治系统AS1,AS2,AS3，其中：
+AS1包含设备：as1core1,as1border1,as1border2
+AS2包含设备：host1,host2,as2core1,as2core2,as2border1,as2border2,as2dist1,as2dist2
+AS3包含设备：as3core1,as3border1,as3border2
+网络拓扑图的边由下列设备对组成
+[as1core1, as1border1], [as1core1, as1border2], [as1border1, as2border1], [as1border2, as3border2],
+[as3border2, as3core1], [as3core1, as3border1], [as3border1, as2border2],
+[as2border2,as2core1 ], [as2border2, as2core2], [as2border1, as2core1], [as2border1, as2core2],
+[as2core1, as2dist1], [as2core1, as2dist2], [as2core2, as2dist1], [as2core1, as2dist2],
+[as2dist1, as2dept1], [as2dist2, as2dept1], [as2dept1, host1], [as2dept1, host2]
+网络的拓扑图如下，根据设备连接关系，分析从设备as1core1g是否可以经过as3core1到达host1，并写出完整路径

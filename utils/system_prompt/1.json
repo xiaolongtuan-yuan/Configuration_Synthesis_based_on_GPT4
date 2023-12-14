@@ -1,0 +1,54 @@
+{
+  "result": [
+    {
+      "policy": "check_connect",
+      "parameter": {
+        "start": "s1",
+        "end": "h1"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_connect",
+      "parameter": {
+        "start": "s2",
+        "end": "h1"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_connect",
+      "parameter": {
+        "start": "s3",
+        "end": "h1"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_connect",
+      "parameter": {
+        "start": "s4",
+        "end": "h1"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "r1": "s1",
+        "d1": "h1",
+        "r2": "s2"
+      },
+      "bool": true
+    },
+    {
+      "policy": "check_fwd",
+      "parameter": {
+        "r1": "s4",
+        "d1": "h2",
+        "r2": "s3"
+      },
+      "bool": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Flow,Traces,TraceCount
+start=border1 interface=ge-0/0/0.0 [10.12.11.1:49152->2.128.0.1:33434 UDP],"[((RECEIVED(ge-0/0/0.0), PERMITTED(OUTSIDE_TO_INSIDE (INGRESS_FILTER)), NO_ROUTE(Discarded)))]",1
+start=border1 interface=ge-0/0/1.0 [2.12.11.3:49152->2.128.0.1:33434 UDP],"[((RECEIVED(ge-0/0/1.0), NO_ROUTE(Discarded)))]",1
+start=border1 interface=ge-0/0/2.0 [2.12.12.3:49152->2.128.0.1:33434 UDP],"[((RECEIVED(ge-0/0/2.0), NO_ROUTE(Discarded)))]",1
+start=border2 interface=ge-0/0/0.0 [10.23.21.1:49152->2.128.0.1:33434 UDP],"[((RECEIVED(ge-0/0/0.0), PERMITTED(OUTSIDE_TO_INSIDE (INGRESS_FILTER)), NO_ROUTE(Discarded)))]",1
+start=border2 interface=ge-0/0/1.0 [2.12.22.3:49152->2.128.0.1:33434 UDP],"[((RECEIVED(ge-0/0/1.0), NO_ROUTE(Discarded)))]",1
+start=border2 interface=ge-0/0/2.0 [2.12.21.3:49152->2.128.0.1:33434 UDP],"[((RECEIVED(ge-0/0/2.0), NO_ROUTE(Discarded)))]",1

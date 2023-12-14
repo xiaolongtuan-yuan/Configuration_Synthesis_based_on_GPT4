@@ -1,0 +1,83 @@
+已知有如下三种低级网络路由策略：
+1. check_waypoint(start,end,waypoint)：流量从start节点转发到end节点，流量在网络中会经过waypoint节点
+2. check_reachable(start,end)：从start节点的流量能够到达end节点
+3. check_avoidance(start,end,avoidance): 流量从start节点转发到end节点，流量需要避开avoidance节点
+因为涉及到OSPF和BGP协议，当需求涉及到自治网络的AS名时，请使用该网络中的所有边界路由器（可能存在多个）设备名进行替换
+由于需求设计到多种协议，策略间可能存在矛盾，可能或产生新的静态路由需求来避免矛盾
+
+用户会提供一段高级路由策略的描述，从中抽象出多个低级策略：
+按照要求使用json的格式回复，并使用列表记录多个低级约束：
+{
+  "result": [
+    {
+      "policy": 低级策略名,
+      "parameter": 策略填入的参数,
+      "bool": true或者false，表示该策略是否为真,
+      "type": "BGP"或"OSPF"或"static"，用于指明该策略属于哪个协议
+    },
+    {}
+  ]
+}
+
+例如：
+user:
+已知各个自治网络的设备列表如下：
+AS1:AS1core1、AS1core2、AS1host1、AS1border1、AS1border2
+AS2:AS2core1、AS2border1
+AS3:AS3core1、AS3border1
+1. AS1core1和AS1core2设备均能到达主机AS1host1。
+2. 设备AS1core1到主机AS1host1的流量不经过AS1border2设备
+3. 从AS1core2到AS1host1的流量应经过AS1border2设备
+4. 网络AS2、AS3之间不能互通
+assistent:
+{
+  "result": [
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "start": "core1",
+        "end": "host1"
+      },
+      "bool": true,
+      "type": "OSPF"
+    },
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "start": "core2",
+        "end": "host1"
+      },
+      "bool": true,
+      "type": "OSPF"
+    },
+    {
+      "policy": "check_avoidance",
+      "parameter": {
+        "start": "core1",
+        "end": "host1",
+        "avoidance": "border2"
+      },
+      "bool": true,
+      "type": "OSPF"
+    },
+    {
+      "policy": "check_waypoint",
+      "parameter": {
+        "start": "core2",
+        "end": "host1",
+        "waypoint": "border2"
+      },
+      "bool": true,
+      "type": "OSPF"
+    },
+    {
+      "policy": "check_reachable",
+      "parameter": {
+        "start": "AS2border1",
+        "end": "AS3border1"
+      },
+      "bool": false,
+      "type": "BGP"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+There are some syntax error for the device:
+configs/leaf1.cfg[97]:damping;
+configs/leaf1.cfg[192]:then discard;
+configs/core1.cfg[9]:host 2.1.2.2;
+configs/leaf1.cfg[102]:reuse 750;
+configs/border2.cfg[58]:send-community;
+configs/leaf1.cfg[103]:suppress 2000;
+configs/border2.cfg[77]:route 2.128.0.0/16 policy { };
+configs/core1.cfg[10]:any notice;
+configs/border2.cfg[141]:2.128.0.0/9 longer;
+configs/border2.cfg[59]:accept-remote-nexthop; # Based on `bgp additional-paths send receive`
+configs/border1.cfg[11]:authentication-order [ "password" ];
+configs/leaf1.cfg[130]:community add 65001:2;
+configs/leaf1.cfg[101]:half-life 15;
+configs/border2.cfg[138]:2.0.0.0/8 longer;
+configs/core1.cfg[8]:host 1.1.1.1;
+configs/leaf1.cfg[104]:max-suppress-time 60;
+configs/leaf1.cfg[188]:destination-address {
+configs/leaf1.cfg[195]:then accept;
+configs/spine2.cfg[114]:firewall {
+configs/leaf1.cfg[165]:port [www ssh];
+configs/leaf1.cfg[189]:[2.128.0.2/32 2.128.1.2/32];
+configs/border2.cfg[85]:route 2.128.1.255/32 receive;
+configs/leaf1.cfg[106]:community as2_community members .*:2;
+configs/border1.cfg[60]:send-community both;

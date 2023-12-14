@@ -1,0 +1,43 @@
+,Neighbor,Included_Prefixes,Excluded_Prefixes,Community,Protocol,Node1,Filter1,Text1,Action1,Node2,Filter2,Text2,Action2
+0,"2.1.1.1
+2.1.1.2
+2.1.3.1
+2.1.3.2",,,,,core2-CURRENT,,ABSENT,,core2-REFERENCE,,PRESENT,
+1,"2.34.101.3
+2.34.201.3",,,,,leaf1-CURRENT,,ABSENT,,leaf1-REFERENCE,,PRESENT,
+2,2.34.101.4-IMPORT,0.0.0.0/0:0-32,,,BGP,spine1-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine1-REFERENCE,dept_to_as2dist,DEFAULT BEHAVIOR,REJECT
+3,2.34.101.4-IMPORT,0.0.0.0/0:0-32,,"(,|\{|\}|^|$| )65001:",BGP,spine1-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine1-REFERENCE,dept_to_as2dist,"route-map dept_to_as2dist permit 100
+match community dept_community
+set local-preference 350","SET LOCAL PREF 350
+ACCEPT"
+4,2.34.101.4-EXPORT,0.0.0.0/0:0-32,"1.0.1.0/24
+1.0.2.0/24
+3.0.1.0/24
+3.0.2.0/24",,BGP,spine1-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine1-REFERENCE,as2dist_to_dept,DEFAULT BEHAVIOR,REJECT
+5,2.34.101.4-EXPORT,"1.0.1.0/24
+1.0.2.0/24
+3.0.1.0/24
+3.0.2.0/24",,,BGP,spine1-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine1-REFERENCE,as2dist_to_dept,"route-map as2dist_to_dept permit 100
+match ip address 105
+set metric 50
+set community 2:65001 additive","SET METRIC 50
+ADD COMMUNITIES [^2:65001$ ]
+ACCEPT"
+6,2.34.201.4-IMPORT,0.0.0.0/0:0-32,,,BGP,spine2-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine2-REFERENCE,dept_to_as2dist,DEFAULT BEHAVIOR,REJECT
+7,2.34.201.4-IMPORT,0.0.0.0/0:0-32,,"(,|\{|\}|^|$| )65001:",BGP,spine2-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine2-REFERENCE,dept_to_as2dist,"route-map dept_to_as2dist permit 100
+match community dept_community
+set local-preference 350","SET LOCAL PREF 350
+ACCEPT"
+8,2.34.201.4-EXPORT,0.0.0.0/0:0-32,"1.0.1.0/24
+1.0.2.0/24
+3.0.1.0/24
+3.0.2.0/24",,BGP,spine2-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine2-REFERENCE,as2dist_to_dept,DEFAULT BEHAVIOR,REJECT
+9,2.34.201.4-EXPORT,"1.0.1.0/24
+1.0.2.0/24
+3.0.1.0/24
+3.0.2.0/24",,,BGP,spine2-CURRENT,DEFAULT POLICY,DEFAULT BEHAVIOR,ACCEPT,spine2-REFERENCE,as2dist_to_dept,"route-map as2dist_to_dept permit 100
+match ip address 105
+set metric 50
+set community 2:65001 additive","SET METRIC 50
+ADD COMMUNITIES [^2:65001$ ]
+ACCEPT"

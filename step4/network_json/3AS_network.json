@@ -1,0 +1,82 @@
+{
+  "network_name": "3AS_example",
+  "AS_count": 3,
+  "AS": [
+    {
+      "AS_name": "AS1",
+      "devices": [
+        {
+          "device_id": 1,
+          "device_name": "AS1border1",
+          "device_type": "border"
+        },
+        {
+          "device_id": 2,
+          "device_name": "AS1core1",
+          "device_type": "core"
+        },
+        {
+          "device_id": 3,
+          "device_name": "host1",
+          "device_type": "host"
+        }
+      ]
+    },
+    {
+      "AS_name": "AS2",
+      "devices": [
+        {
+          "device_id": 4,
+          "device_name": "AS2border1",
+          "device_type": "border"
+        },
+        {
+          "device_id": 5,
+          "device_name": "AS2core1",
+          "device_type": "core"
+        }
+      ]
+    },
+    {
+      "AS_name": "AS3",
+      "devices": [
+        {
+          "device_id": 6,
+          "device_name": "AS3border1",
+          "device_type": "border"
+        },
+        {
+          "device_id": 7,
+          "device_name": "AS3core1",
+          "device_type": "core"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    [
+      "AS1border1",
+      "AS2border1"
+    ],
+    [
+      "AS1border1",
+      "AS3border1"
+    ],
+    [
+      "AS1border1",
+      "AS1core1"
+    ],
+    [
+      "AS1core1",
+      "host1"
+    ],
+    [
+      "AS2border1",
+      "AS2core1"
+    ],
+    [
+      "AS3border1",
+      "AS3core1"
+    ]
+  ]
+}

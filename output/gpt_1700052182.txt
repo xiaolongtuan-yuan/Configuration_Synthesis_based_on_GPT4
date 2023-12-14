@@ -1,0 +1,1448 @@
+user:
+## base/configs/leaf1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname leaf1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.1.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip access-group RESTRICT_NETWORK_TRAFFIC_IN in
+ ip address 2.34.101.4 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip access-group RESTRICT_NETWORK_TRAFFIC_IN in
+ ip address 2.34.201.4 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.128.0.2 255.255.255.252
+ ip access-group RESTRICT_HOST_TRAFFIC_IN in
+ ip access-group RESTRICT_HOST_TRAFFIC_OUT out
+ negotiation auto
+!
+interface GigabitEthernet3/0
+ ip address 2.128.1.2 255.255.255.252
+ ip access-group RESTRICT_HOST_TRAFFIC_IN in
+ ip access-group RESTRICT_HOST_TRAFFIC_OUT out
+ negotiation auto
+!
+router bgp 65001
+ bgp router-id 2.1.4.1
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor 2.34.101.3 peer-group as2
+ neighbor 2.34.201.3 peer-group as2
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  network 2.128.0.0 mask 255.255.255.252
+  network 2.128.1.0 mask 255.255.255.252
+  neighbor as2 send-community
+  neighbor as2 route-map as2_to_dept in
+  neighbor as2 route-map dept_to_as2 out
+  neighbor 2.34.101.3 activate
+  neighbor 2.34.201.3 activate
+  ! maximum-paths eibgp 5
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip bgp-community new-format
+ip community-list expanded as2_community permit _2:
+!
+no ip http server
+no ip http secure-server
+!
+ip access-list extended RESTRICT_HOST_TRAFFIC_IN
+ permit ip 2.128.0.0 0.0.255.255 any
+ deny   ip any any
+ permit icmp any any
+ip access-list extended RESTRICT_HOST_TRAFFIC_OUT
+ permit tcp any 2.128.0.0 0.0.1.255 eq www
+ permit tcp any 2.128.0.0 0.0.1.255 eq ssh
+ permit udp any 2.128.0.0 0.0.255.255 
+ deny   ip any any
+ip access-list extended RESTRICT_NETWORK_TRAFFIC_IN
+ deny ip any 2.128.0.2 0.0.0.0
+ deny ip any 2.128.1.2 0.0.0.0
+ permit ip any any
+!
+access-list 102 permit ip host 2.128.0.0 host 255.255.255.252
+access-list 102 permit ip host 2.128.1.0 host 255.255.255.252
+access-list 105 permit ip host 1.0.1.0 host 255.255.255.0
+access-list 105 permit ip host 1.0.2.0 host 255.255.255.0
+access-list 105 permit ip host 3.0.1.0 host 255.255.255.0
+access-list 105 permit ip host 3.0.2.0 host 255.255.255.0
+!
+route-map dept_to_as2 permit 100
+ match ip address 102
+ set metric 50
+ set community 65001:2 additive
+!
+route-map as2_to_dept permit 100
+ match community as2_community
+ set local-preference 350
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/configs/core2.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname core2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging host 1.1.1.1
+logging host 2.2.2.2
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.2.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ mtu 1800
+ ip address 2.12.22.2 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+ ip ospf cost 100
+!
+interface GigabitEthernet1/0
+ mtu 1600
+ ip address 2.12.12.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 100
+!
+interface GigabitEthernet2/0
+ mtu 1700
+ ip address 2.23.22.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 100
+!
+interface GigabitEthernet3/0
+ ip address 2.23.21.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 100
+!
+router ospf 1
+ router-id 2.1.2.2
+ network 2.0.0.0 0.255.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.2.2
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor 2.1.1.1 peer-group as2
+ neighbor 2.1.1.1 update-source Loopback0
+ neighbor 2.1.1.2 peer-group as2
+ neighbor 2.1.1.2 update-source Loopback0
+ neighbor 2.1.3.1 peer-group as2
+ neighbor 2.1.3.1 update-source Loopback0
+ neighbor 2.1.3.2 peer-group as2
+ neighbor 2.1.3.2 update-source Loopback0
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  neighbor as2 send-community
+  neighbor as2 route-reflector-client
+  neighbor as2 advertise additional-paths all
+  neighbor as3 peer-group
+  neighbor as3 route-map filter-bogons in
+  neighbor 2.1.1.1 activate
+  neighbor 2.1.1.2 activate
+  neighbor 2.1.3.1 activate
+  neighbor 2.1.3.2 activate
+ exit-address-family
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+ip route 2.128.1.1 255.255.255.255 null0
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/configs/core1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname core1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging host 1.1.1.1
+logging host 2.1.2.2
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.2.1 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.12.11.2 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+ ip ospf cost 1
+!
+interface GigabitEthernet1/0
+ ip address 2.12.21.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 1
+!
+interface GigabitEthernet2/0
+ ip address 2.23.11.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 1
+!
+interface GigabitEthernet3/0
+ ip address 2.23.12.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 1
+!
+router ospf 1
+ router-id 2.1.2.1
+ network 2.0.0.0 0.255.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.2.1
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor 2.1.1.1 peer-group as2
+ neighbor 2.1.1.1 update-source Loopback0
+ neighbor 2.1.1.2 peer-group as2
+ neighbor 2.1.1.2 update-source Loopback0
+ neighbor 2.1.3.1 peer-group as2
+ neighbor 2.1.3.1 update-source Loopback0
+ neighbor 2.1.3.2 peer-group as2
+ neighbor 2.1.3.2 update-source Loopback0
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  neighbor as2 send-community
+  neighbor as2 route-reflector-client
+  neighbor as2 advertise additional-paths all
+  neighbor 2.1.1.1 activate
+  neighbor 2.1.1.2 activate
+  neighbor 2.1.3.1 activate
+  neighbor 2.1.3.2 activate
+  ! maximum-paths eibgp 5
+ exit-address-family
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/configs/spine2.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname spine2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.3.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.23.22.3 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.23.12.3 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.34.201.3 255.255.255.0
+ negotiation auto
+!
+router ospf 1
+ router-id 2.1.3.2
+ redistribute connected subnets
+ network 2.1.0.0 0.0.255.255 area 1
+ network 2.23.0.0 0.0.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.3.2
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor dept peer-group
+ neighbor dept remote-as 65001
+ neighbor 2.1.2.1 peer-group as2
+ neighbor 2.1.2.1 update-source Loopback0
+ neighbor 2.1.2.2 peer-group as2
+ neighbor 2.1.2.2 update-source Loopback0
+ neighbor 2.34.201.4 peer-group dept
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  neighbor as2 send-community
+  neighbor as2 advertise additional-paths all
+  neighbor dept send-community
+  neighbor dept route-map dept_to_as2dist in
+  neighbor dept route-map as2dist_to_dept out
+  neighbor 2.1.2.1 activate
+  neighbor 2.1.2.2 activate
+  neighbor 2.34.201.4 activate
+  ! maximum-paths eibgp 5
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip bgp-community new-format
+ip community-list expanded dept_community permit _65001:
+!
+no ip http server
+no ip http secure-server
+!
+access-list 102 permit ip host 2.128.0.0 host 255.255.0.0
+access-list 105 permit ip host 1.0.1.0 host 255.255.255.0
+access-list 105 permit ip host 1.0.2.0 host 255.255.255.0
+access-list 105 permit ip host 3.0.1.0 host 255.255.255.0
+access-list 105 permit ip host 3.0.2.0 host 255.255.255.0
+!
+route-map as2dist_to_dept permit 100
+ match ip address 105
+ set metric 50
+ set community 2:65001 additive
+!
+route-map dept_to_as2dist permit 100
+ match community dept_community
+ set local-preference 350
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/configs/border2.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname border2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+ntp server 18.18.18.18
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.1.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 10.23.21.2 255.255.255.0
+ ip access-group OUTSIDE_TO_INSIDE in
+ ip access-group INSIDE_TO_AS3 out
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.12.22.1 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.12.21.1 255.255.255.0
+ negotiation auto
+!
+router ospf 1
+ router-id 2.1.1.2
+ redistribute connected subnets
+ network 2.0.0.0 0.255.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.1.2
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor 2.1.2.1 peer-group as2
+ neighbor 2.1.2.1 update-source Loopback0
+ neighbor 2.1.2.2 peer-group as2
+ neighbor 2.1.2.2 update-source Loopback0
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  aggregate-address 2.128.0.0 255.255.0.0 summary-only
+  neighbor as2 send-community
+  neighbor as2 advertise additional-paths all
+  neighbor 2.1.2.1 activate
+  neighbor 2.1.2.2 activate
+  ! maximum-paths eibgp 5
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip bgp-community new-format
+ip community-list expanded as1_community permit _1:
+ip community-list expanded as2_community permit _2:
+ip community-list expanded as3_community permit _3:
+!
+no ip http server
+no ip http secure-server
+!
+ip access-list extended INSIDE_TO_AS3
+ permit ip 2.0.0.0 0.255.255.255 3.0.0.0 0.255.255.255
+ permit ip 10.23.21.2 0.0.0.0 10.23.21.3 0.0.0.0
+ deny   ip any any
+ip access-list extended OUTSIDE_TO_INSIDE
+ permit tcp any 2.128.0.0 0.0.1.255 eq ssh
+ permit udp any 2.0.0.0 0.255.255.255
+ deny ip any any
+!
+!
+ip prefix-list inbound_route_filter seq 5 deny 2.0.0.0/8 le 32
+ip prefix-list inbound_route_filter seq 10 permit 0.0.0.0/0 le 32
+!
+ip prefix-list outbound_routes seq 5 permit 2.128.0.0/9 ge 16
+access-list 101 permit ip host 1.0.1.0 host 255.255.255.0
+access-list 101 permit ip host 1.0.2.0 host 255.255.255.0
+access-list 103 permit ip host 3.0.1.0 host 255.255.255.0
+access-list 103 permit ip host 3.0.2.0 host 255.255.255.0
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/configs/spine1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname spine1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.3.1 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 2.23.11.3 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.23.21.3 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.34.101.3 255.255.255.0
+ negotiation auto
+!
+router ospf 1
+ router-id 2.1.3.1
+ ! redistribute connected subnets
+ network 2.1.0.0 0.0.255.255 area 1
+ network 2.23.0.0 0.0.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.3.1
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor dept peer-group
+ neighbor dept remote-as 65001
+ neighbor 2.1.2.1 peer-group as2
+ neighbor 2.1.2.1 update-source Loopback0
+ neighbor 2.1.2.2 peer-group as2
+ neighbor 2.1.2.2 update-source Loopback0
+ neighbor 2.34.101.4 peer-group dept
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  neighbor as2 send-community
+  neighbor as2 advertise additional-paths all
+  neighbor dept send-community
+  neighbor dept route-map dept_to_as2dist in
+  neighbor dept route-map as2dist_to_dept out
+  neighbor 2.1.2.1 activate
+  neighbor 2.1.2.2 activate
+  neighbor 2.34.101.4 activate
+  ! maximum-paths eibgp 5
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip bgp-community new-format
+ip community-list expanded dept_community permit _65001:
+!
+no ip http server
+no ip http secure-server
+!
+access-list 102 permit ip host 2.128.0.0 host 255.255.0.0
+access-list 105 permit ip host 1.0.1.0 host 255.255.255.0
+access-list 105 permit ip host 1.0.2.0 host 255.255.255.0
+access-list 105 permit ip host 3.0.1.0 host 255.255.255.0
+access-list 105 permit ip host 3.0.2.0 host 255.255.255.0
+!
+route-map as2dist_to_dept permit 100
+ match ip address 105
+ set metric 50
+ set community 2:65001 additive
+!
+route-map dept_to_as2dist permit 100
+ match community dept_community
+ set local-preference 350
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/configs/border1.cfg
+
+```
+
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname border1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+ntp server 18.18.18.18
+ntp server 23.23.23.23
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+aaa new-model
+aaa authentication login privilege-mode
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.1.1 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ ip address 10.12.11.2 255.255.255.0
+ ip access-group OUTSIDE_TO_INSIDE in
+ ip access-group INSIDE_TO_AS1 out
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ ip address 2.12.11.1 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ ip address 2.12.12.1 255.255.255.0
+ negotiation auto
+!
+router ospf 1
+ router-id 2.1.1.1
+ redistribute connected subnets
+ network 2.0.0.0 0.255.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.1.1
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor 2.1.2.1 peer-group as2
+ neighbor 2.1.2.1 update-source Loopback0
+ neighbor 2.1.2.2 peer-group as2
+ neighbor 2.1.2.2 update-source Loopback0
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  aggregate-address 2.128.0.0 255.255.0.0 summary-only
+  neighbor as2 send-community
+  neighbor as2 advertise additional-paths all
+  neighbor 2.1.2.1 activate
+  neighbor 2.1.2.2 activate
+  ! maximum-paths eibgp 5
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip bgp-community new-format
+ip community-list expanded as1_community permit _1:
+ip community-list expanded as2_community permit _2:
+ip community-list expanded as3_community permit _3:
+!
+no ip http server
+no ip http secure-server
+!
+ip access-list extended INSIDE_TO_AS1
+ permit ip 2.0.0.0 0.255.255.255 1.0.0.0 0.255.255.255
+ permit ip 10.12.11.2 0.0.0.0 10.12.11.1 0.0.0.0 
+ deny   ip any any
+ip access-list extended OUTSIDE_TO_INSIDE
+ permit tcp any 2.128.0.0 0.0.1.255 eq ssh
+ permit udp any 2.0.0.0 0.255.255.255
+ deny ip any any
+!
+!
+ip prefix-list inbound_route_filter seq 5 deny 2.0.0.0/8 le 32
+ip prefix-list inbound_route_filter seq 10 permit 0.0.0.0/0 le 32
+!
+ip prefix-list outbound_routes seq 5 permit 2.128.0.0/9 ge 16
+access-list 101 permit ip host 1.0.1.0 host 255.255.255.0
+access-list 101 permit ip host 1.0.2.0 host 255.255.255.0
+access-list 103 permit ip host 3.0.1.0 host 255.255.255.0
+access-list 103 permit ip host 3.0.2.0 host 255.255.255.0
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+
+```
+
+## base/hosts/host-www.json
+
+```
+{
+	"hostname" : "host-www",
+	"hostInterfaces" : {
+		"eth0" : {
+			"name": "eth0",
+      "prefix" : "2.128.1.1/30",
+      "gateway" : "2.128.1.2"
+		}
+	}
+}
+
+```
+
+## base/hosts/host-db.json
+
+```
+{
+	"hostname" : "host-db",
+	"hostInterfaces" : {
+		"eth0" : {
+			"name": "eth0",
+      "prefix" : "2.128.0.1/30",
+      "gateway": "2.128.0.2"
+		}
+	}
+}
+
+```
+以上是现有网络中所有设备的配置文件，请修改配置文件的内容，使得网络流量不经过core1，同时不改变网络端到端的连通性
+assistant:
+要确保网络流量不经过 `core1` 而不改变网络端到端的连通性，我们可以在核心路由器 `core2` 上进行配置改动，从而促使所有流量都通过核心路由器 `core2` 而不通过 `core1`。
+
+### core2.cfg 配置更改
+要实现这一变动，可以在 `core2` 上修改 OSPF 的成本（cost）配置，使得经过 `core2` 的路由具有更低的 cost，因此优先选择。我们将 `core1` 上的 OSPF 接口成本增加，从而降低其路由优先级。
+
+在 `core2` 设备的 OSPF 接口配置中，我们将提高所有 GigabitEthernet 接口的 cost 至一个较高的值 (比如设置为 10000)，如下所示：
+
+```cfg
+interface GigabitEthernet0/0
+ ip address 2.12.22.2 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+ ip ospf cost 10000
+!
+interface GigabitEthernet1/0
+ ip address 2.12.12.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 10000
+!
+interface GigabitEthernet2/0
+ ip address 2.23.22.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 10000
+!
+interface GigabitEthernet3/0
+ ip address 2.23.21.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 10000
+!
+```
+
+随后我们会在 `core2` 配置中发现 OSPF 路由器部分并增加相关的 cost 配置，应用如下（其余部分不变）:
+
+```cfg
+router ospf 1
+ router-id 2.1.2.2
+ network 2.0.0.0 0.255.255.255 area 1
+!
+```
+
+注意，进行此设置后，必须确保 `core1` 的 OSPF 接口成本低于 `core2`，以便流量优先流向 `core2`。 如果 `core1` 的 cost 已经足够低，则不需要在 `core1` 上进行任何更改。如果需要调整 `core1` 的 OSPF cost 以确保流量优先经 `core2` 流动，类似调整方法同上。
+
+以上修改只改变了 `core2` 的 OSPF cost 设置，因此，你只需要替换 `core2` 的配置文件即可。
+
+### 其他注意事项
+进行此类更改后，为了测试和验证更改是否成功，建议进行以下操作：
+
+1. 重新加载或重新启动更改的网络设备，以便新配置生效。
+2. 使用诸如 `ping`、`traceroute` 之类的工具来测试网络的端到端连通性，确保流量确实不再穿过 `core1`。
+3. 检查 OSPF 的路由表，以确保新的路由成本配置生效，且流量被正确的引导。
+
+如果网络包含其他冗余路径或备用配置，它们也需要一并检查和调整以符合网络流量的新路径规划。
+user:
+将core2的接口的ospf成本提高会导致流量更趋向流入core1交换机
+assistant:
+抱歉我之前理解有误。要想确保流量不经过 `core1` ，我们应该在 `core1` 上增加 OSPF 成本，而不是 `core2` 上。这样，流量就会倾向于经过核心路由器 `core2` 。
+
+### core1.cfg 配置更改
+
+在 `core1` 配置中的每个 OSPF 接口配置中，我们将成本增加到一个较高的值（比如设置为 10000），避免流量通过 `core1`：
+
+```cfg
+!
+interface GigabitEthernet0/0
+ ip address 2.12.11.2 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+ ip ospf cost 10000
+!
+interface GigabitEthernet1/0
+ ip address 2.12.21.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 10000
+!
+interface GigabitEthernet2/0
+ ip address 2.23.11.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 10000
+!
+interface GigabitEthernet3/0
+ ip address 2.23.12.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 10000
+!
+router ospf 1
+ router-id 2.1.2.1
+ network 2.0.0.0 0.255.255.255 area 1
+!
+```
+
+其余部分的配置文件 `core1.cfg` 维持不变。
+
+### 其他注意事项
+
+进行以上更改并重新加载配置后，通过以下方式验证配置是否正确生效：
+
+1. 测试端到端连通性，如 `ping` 和 `traceroute` 命令。
+2. 检查 OSPF 的路由表，确保 `core1` 的路由跳数较高（因为成本较高）。
+3. 通过 `show ip ospf interface` 命令，确保成本已正确地应用于接口。
+4. 观察流量路径，确保其不再流过 `core1`。
+
+请进行上述的 `core1.cfg` 更改，并替换原有的配置文件。
+user:
+修改后，发现网络的连通性发生变化，详情如下：
+NULL_ROUTED
+1. node: border1
+  RECEIVED(GigabitEthernet0/0)
+  PERMITTED(OUTSIDE_TO_INSIDE (INGRESS_FILTER))
+  FORWARDED(Forwarded out interface: GigabitEthernet2/0 with resolved next-hop IP: 2.12.12.2, Routes: [ibgp (Network: 2.128.1.0/30, Next Hop: ip 2.34.201.4)])
+  TRANSMITTED(GigabitEthernet2/0)
+2. node: core2
+  RECEIVED(GigabitEthernet1/0)
+  NULL_ROUTED(Discarded, Routes: [static (Network: 2.128.1.1/32, Next Hop: discard)])
+
+NULL_ROUTED
+1. node: border2
+  RECEIVED(GigabitEthernet0/0)
+  PERMITTED(OUTSIDE_TO_INSIDE (INGRESS_FILTER))
+  FORWARDED(Forwarded out interface: GigabitEthernet1/0 with resolved next-hop IP: 2.12.22.2, Routes: [ibgp (Network: 2.128.1.0/30, Next Hop: ip 2.34.201.4)])
+  TRANSMITTED(GigabitEthernet1/0)
+2. node: core2
+  RECEIVED(GigabitEthernet0/0)
+  NULL_ROUTED(Discarded, Routes: [static (Network: 2.128.1.1/32, Next Hop: discard)])
+assistant:
+通信被 `NULL_ROUTED` 通常意味着数据包到达了一个没有定义的路由或者数据包到了一个配置为丢弃数据包（例如黑洞路由）的目的地。从你的输出中可以看出，流量最终被丢弃了（Discarded），因为它与一个静态路由匹配，而该静态路由的下一跳是 discard。具体来说，路由 `2.128.1.1/32` 在 `core2` 上被配置成黑洞路由。
+
+在 `core2` 配置文件中，我们可以看到如下静态路由配置：
+
+```cfg
+ip route 2.128.1.1 255.255.255.255 null0
+```
+
+该配置将地址 `2.128.1.1` 的流量直接丢弃。为了维持网络的端到端连通性而不经过 `core1` ，我们需要保证 OSPF 成本的增加不会导致流量走向不存在的路由或黑洞路由。所以我们需要对	`core2` 进行如下修改：
+
+### 修改 core2.cfg
+
+我们需要移除导致流量被 null routed 的静态路由配置：
+
+```cfg
+no ip route 2.128.1.1 255.255.255.255 null0
+```
+
+在移除了上述黑洞路由之后，流量应该会通过 OSPF 或 BGP 路由重新路由到正确的下一跳。
+
+请注意在进行任何配置更改后，需要仔细审计 OSPF 和 BGP 路由，确保所有路由都是预期的，并且没有意外的路由可能导致流量丢失。在测试新配置前，应确认已在路由表中看到期望的更改。使用 `show ip route` 和 `show ip bgp` 命令可以帮助确认这一点。
+
+进行这些更改后，重新加载或者重启 `core2` 并且测试网络的端到端连通性以确保问题被解决。
+user:
+生成完整的配置文件
+assistant:
+根据您提供的信息和对问题的了解，以下是修正后的 `core2.cfg` 的完整配置文件，移除了导致空路由（NULL_ROUTED）的静态路由，并保留您之前的配置。
+
+```cfg
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname core2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging host 1.1.1.1
+logging host 2.2.2.2
+!
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 2.1.2.2 255.255.255.255
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface GigabitEthernet0/0
+ mtu 1800
+ ip address 2.12.22.2 255.255.255.0
+ media-type gbic
+ speed 1000
+ duplex full
+ negotiation auto
+ ip ospf cost 100
+!
+interface GigabitEthernet1/0
+ mtu 1600
+ ip address 2.12.12.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 100
+!
+interface GigabitEthernet2/0
+ mtu 1700
+ ip address 2.23.22.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 100
+!
+interface GigabitEthernet3/0
+ ip address 2.23.21.2 255.255.255.0
+ negotiation auto
+ ip ospf cost 100
+!
+router ospf 1
+ router-id 2.1.2.2
+ network 2.0.0.0 0.255.255.255 area 1
+!
+router bgp 2
+ bgp router-id 2.1.2.2
+ bgp log-neighbor-changes
+ neighbor as2 peer-group
+ neighbor as2 remote-as 2
+ neighbor 2.1.1.1 peer-group as2
+ neighbor 2.1.1.1 update-source Loopback0
+ neighbor 2.1.1.2 peer-group as2
+ neighbor 2.1.1.2 update-source Loopback0
+ neighbor 2.1.3.1 peer-group as2
+ neighbor 2.1.3.1 update-source Loopback0
+ neighbor 2.1.3.2 peer-group as2
+ neighbor 2.1.3.2 update-source Loopback0
+ !
+ address-family ipv4
+  bgp dampening
+  bgp additional-paths select all
+  bgp additional-paths send receive
+  neighbor as2 send-community
+  neighbor as2 route-reflector-client
+  neighbor as2 advertise additional-paths all
+  neighbor as3 peer-group
+  neighbor as3 route-map filter-bogons in
+  neighbor 2.1.1.1 activate
+  neighbor 2.1.1.2 activate
+  neighbor 2.1.3.1 activate
+  neighbor 2.1.3.2 activate
+ exit-address-family
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
+```
+
+我已经从原来的配置中移除了这一行：
+
+```cfg
+no ip route 2.128.1.1 255.255.255.255 null0
+```
+
+通过这次修改，应该能够解决流量被意外丢弃的问题。流量现在应当正常基于 OSPF 和 BGP 的动态路由通过您的网络。
+
+在实施这些更改之前，请务必在非生产环境中进行测试，以确保更改不会意外影响网络的其他部分。此外，在更改任何网络设备配置之前，请确保有完整的当前配置文件和系统状态的备份。

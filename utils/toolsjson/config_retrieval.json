@@ -1,0 +1,23 @@
+{
+  "type": "function",
+  "function": {
+    "name": "config_retrieval",
+    "description": "Retrieve the code in the target device's configuration file and call this function when you need to check the configuration file of an existing device. Do not call this function unless necessary",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "The device name of the target retrieval device, such as 'configs/as1border1.cfg'"
+        },
+        "line_number": {
+          "type": "integer",
+          "description": "Line number. If you need to retrieve only one line of the configuration file, carry this parameter. The function will return only the code for that line"
+        }
+      },
+      "required": [
+        "file"
+      ]
+    }
+  }
+}

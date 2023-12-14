@@ -1,0 +1,4 @@
+,Prefix,Node1,Destination1,Tag1,AdminDist1,Text1,Lines1,Node2,Destination2,Tag2,AdminDist2,Text2,Lines2
+0,2.128.1.1/32,core1-CURRENT,null_interface,-1,5,route 2.128.1.1/32 reject,[116],core1-REFERENCE,,,,,
+1,2.128.1.1/32,core2-CURRENT,2.12.22.2,-1,5,route 2.128.1.1/32 next-hop 2.12.22.2,[73],core2-REFERENCE,null_interface,-1,1,ip route 2.128.1.1 255.255.255.255 null0,[126]
+2,2.128.0.0/16,spine2-CURRENT,null_interface,-1,5,route 2.128.0.0/16 reject,[81],spine2-REFERENCE,,,,,

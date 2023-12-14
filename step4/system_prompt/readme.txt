@@ -1,0 +1,3 @@
+gen_system.txt是gpt生成配置文件的sysytem提示词
+BGP_recognize.txt是解析BGP需求阶段的提示词
+OSPF_recognize.txt是解析OSPF需求阶段的提示词

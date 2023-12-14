@@ -1,0 +1,11 @@
+There are some syntax error for the device:
+configs/as2core2.cfg[84]:access-list ACL_TO_HOST1 deny   ip any any
+configs/as2core2.cfg[83]:access-list ACL_TO_HOST1 permit ip host 3.10.1.1 host 2.128.0.101
+configs/as2core2.cfg[85]:access-list ACL_TO_HOST1 permit ip host 3.1.1.1 host 2.128.0.101
+configs/as2core2.cfg[86]:access-list ACL_TO_HOST1 permit ip host 3.2.2.2 host 2.128.0.101
+configs/as2core2.cfg[87]:access-list ACL_TO_HOST1 deny   ip any any
+configs/as2core2.cfg[84]:access-list ACL_TO_HOST1 permit ip host 3.10.1.1 host 2.128.0.101
+configs/as2core2.cfg[84]:access-list ACL_TO_HOST1 permit ip host 3.1.1.1 host 2.128.0.101
+configs/as2core2.cfg[85]:access-list ACL_TO_HOST1 permit ip host 3.2.2.2 host 2.128.0.101
+configs/as2core2.cfg[86]:access-list ACL_TO_HOST1 deny   ip any any
+configs/as2core2.cfg[83]:access-list ACL_TO_HOST1 permit ip host 3.10.1.1 host 2.128.0.101

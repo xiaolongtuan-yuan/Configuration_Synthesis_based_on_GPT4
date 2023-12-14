@@ -1,0 +1,24 @@
+{
+  "type": "function",
+  "function": {
+    "name": "config_update",
+    "description": "Update the configuration file of a network device and call this function when a new complete configuration is generated for the device",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "The device name of the target retrieval device, such as 'configs/as1border1.cfg'"
+        },
+        "config": {
+          "type": "string",
+          "description": "Re-generated device configuration file. Ensure that the configuration file is complete and runnable"
+        }
+      },
+      "required": [
+        "file",
+        "config"
+      ]
+    }
+  }
+}

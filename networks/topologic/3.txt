@@ -1,0 +1,7 @@
+已知网络中包含以下设备组件
+2个主机：host-db,host-www
+7个交换机：leaf1,spine1,spine2,core1,core2,border1,border2
+网络拓扑图的边由下列设备对组成
+[host-www,leaf1],[host-db,leaf1],[leaf1,spine2],[leaf1,spine1],[spine1,core1],[spine1,core2],[spine2,core1],[spine2,core2],[core1,border1],[core1,border2],
+[core2,border1],[core2,border2]
+网络的拓扑图如下，根据设备连接关系，分析从设备border1到host-db到路径有哪些
